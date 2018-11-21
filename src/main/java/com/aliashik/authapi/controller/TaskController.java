@@ -2,6 +2,8 @@ package com.aliashik.authapi.controller;
 
 import com.aliashik.authapi.entity.Task;
 import com.aliashik.authapi.repository.TaskRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,25 +27,26 @@ public class TaskController {
 	}
 
 	@PostMapping
-	public void addTask(@RequestBody Task task) {
-		taskRepository.save(task);
+	public ResponseEntity<Task> addTask(@RequestBody Task task) {
+		return new ResponseEntity(taskRepository.save(task), HttpStatus.CREATED);
 	}
 
 	@GetMapping
-	public List<Task> getTasks() {
-		return (List<Task>) taskRepository.findAll();
+	public ResponseEntity<List> getTasks() {
+		return new ResponseEntity(taskRepository.findAll(), HttpStatus.OK);
 	}
 
 	@PutMapping("/{id}")
-	public void editTask(@PathVariable long id, @RequestBody Task task) {
+	public ResponseEntity<Task> editTask(@PathVariable long id, @RequestBody Task task) {
 		Task existingTask = taskRepository.findById(id).get();
 		Assert.notNull(existingTask, "Task not found");
 		existingTask.setDescription(task.getDescription());
-		taskRepository.save(existingTask);
+		return new ResponseEntity(taskRepository.save(existingTask), HttpStatus.OK);
 	}
 
 	@DeleteMapping("/{id}")
-	public void deleteTask(@PathVariable long id) {
+	public ResponseEntity deleteTask(@PathVariable long id) {
 		taskRepository.deleteById(id);
+		return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
 	}
 }
