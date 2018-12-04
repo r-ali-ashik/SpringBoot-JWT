@@ -1,5 +1,6 @@
 package com.aliashik.authapi.filter;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.aliashik.authapi.model.SecurityConstants.HEADER_STRING;
 import static com.aliashik.authapi.model.SecurityConstants.SECRET;
@@ -41,19 +43,22 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 		String token = request.getHeader(HEADER_STRING);
 		if (token != null) {
 			// parse the token.
-			String user = Jwts.parser()
+			Claims claims = Jwts.parser()
 					.setSigningKey(SECRET)
 					.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-					.getBody()
-					.getSubject();
+					.getBody();
+
+			String user = claims.getSubject();
+			List<Map> roles = claims.get("roles", List.class);
+
+
+
 			if (user != null) {
-				//TODO fetch roles from the token and add to the authorities list
-				List<GrantedAuthority> authorities = new ArrayList<GrantedAuthority>();
-				authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+				List<GrantedAuthority> authorities = new ArrayList<>();
+				roles.stream().forEach(role -> authorities.add(new SimpleGrantedAuthority((String)role.get("authority"))));
 
 				return new UsernamePasswordAuthenticationToken(user, null, authorities);
 			}
-			return null;
 		}
 		return null;
 	}

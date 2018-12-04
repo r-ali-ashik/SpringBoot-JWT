@@ -1,6 +1,7 @@
 package com.aliashik.authapi.service;
 
 import com.aliashik.authapi.entity.ApplicationUser;
+import com.aliashik.authapi.entity.Role;
 import com.aliashik.authapi.repository.ApplicationUserRepository;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -31,9 +32,14 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		}
 
 		//TODO fetch roles and add roles to the user
+
 		List<GrantedAuthority> authorities = new ArrayList<>();
-		authorities.add(new SimpleGrantedAuthority("ROLE_ADMIN"));
+		applicationUser
+				.getRoles()
+				.stream().forEach(role-> authorities.add(new SimpleGrantedAuthority(((Role)role).getName())));
+
 
 		return new User(applicationUser.getUsername(), applicationUser.getPassword(), authorities);
 	}
 }
+/*((Role)role)*/
