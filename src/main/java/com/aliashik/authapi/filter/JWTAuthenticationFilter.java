@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -29,6 +30,12 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 	public JWTAuthenticationFilter(AuthenticationManager authenticationManager) {
 		this.authenticationManager = authenticationManager;
+
+	}
+
+	public JWTAuthenticationFilter(String loginURL, AuthenticationManager authenticationManager) {
+		this.authenticationManager = authenticationManager;
+		this.setRequiresAuthenticationRequestMatcher(new AntPathRequestMatcher(loginURL));
 	}
 
 	@Override
@@ -57,6 +64,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
 				.signWith(SignatureAlgorithm.HS512, SECRET)
 				.compact();
+
+		//TODO fetch roles and include with the token
+
 		res.addHeader(HEADER_STRING, TOKEN_PREFIX + token);
 	}
 }
