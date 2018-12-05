@@ -24,12 +24,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
-		http.csrf().disable().authorizeRequests()
+
+		http.csrf().disable();
+		http.headers().cacheControl();
+
+		http.authorizeRequests()
 				.antMatchers(HttpMethod.POST, SIGN_UP_URL).permitAll()
+				.antMatchers("/auth/logout").permitAll()
 				.anyRequest().hasRole("ADMIN")
 				.and()
 				.addFilter(new JWTAuthenticationFilter("/auth/login", authenticationManager()))
 				.addFilter(new JWTAuthorizationFilter(authenticationManager()));
+
+		http.requestCache().disable();
 	}
 
 	@Override

@@ -1,7 +1,6 @@
 package com.aliashik.authapi.filter;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,12 +14,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static com.aliashik.authapi.model.SecurityConstants.HEADER_STRING;
-import static com.aliashik.authapi.model.SecurityConstants.SECRET;
-import static com.aliashik.authapi.model.SecurityConstants.TOKEN_PREFIX;
+import static com.aliashik.authapi.model.SecurityConstants.*;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	public JWTAuthorizationFilter(AuthenticationManager authManager) {
@@ -29,8 +27,10 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain) throws IOException, ServletException {
+
 		String header = req.getHeader(HEADER_STRING);
 		if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+			SecurityContextHolder.getContext().setAuthentication(null);
 			chain.doFilter(req, res);
 			return;
 		}
@@ -40,18 +40,28 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 	}
 
 	private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
+
 		String token = request.getHeader(HEADER_STRING);
 		if (token != null) {
 			// parse the token.
-			Claims claims = Jwts.parser()
-					.setSigningKey(SECRET)
-					.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
-					.getBody();
+			Claims claims = null;
+			String user = null;
+			List<Map> roles = Collections.emptyList();
 
-			String user = claims.getSubject();
-			List<Map> roles = claims.get("roles", List.class);
+//			try {
+				claims = Jwts.parser()
+						.setSigningKey(SECRET)
+						.parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+						.getBody();
 
+				user = claims.getSubject();
+				roles = claims.get("roles", List.class);
 
+			/*}catch (ExpiredJwtException ex){
+				ex.printStackTrace();
+			}catch (SignatureException ex){
+				ex.printStackTrace();
+			}*/
 
 			if (user != null) {
 				List<GrantedAuthority> authorities = new ArrayList<>();

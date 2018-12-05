@@ -22,10 +22,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 
-import static com.aliashik.authapi.model.SecurityConstants.EXPIRATION_TIME;
-import static com.aliashik.authapi.model.SecurityConstants.HEADER_STRING;
-import static com.aliashik.authapi.model.SecurityConstants.SECRET;
-import static com.aliashik.authapi.model.SecurityConstants.TOKEN_PREFIX;
+import static com.aliashik.authapi.model.SecurityConstants.*;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	private AuthenticationManager authenticationManager;
@@ -84,13 +81,4 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		res.getWriter().write(responseJson.toJSONString());
 	}
 
-	/*@Override
-	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-		JSONObject responseJson = new JSONObject();
-		responseJson.put("status", "login failed");
-		responseJson.put("message", "check username and password");
-
-		response.getWriter().write(responseJson.toJSONString());
-//		super.unsuccessfulAuthentication(request, response, failed);
-	}*/
 }
