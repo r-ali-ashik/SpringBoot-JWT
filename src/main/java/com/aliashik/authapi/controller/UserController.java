@@ -3,6 +3,9 @@ package com.aliashik.authapi.controller;
 
 import com.aliashik.authapi.entity.ApplicationUser;
 import com.aliashik.authapi.repository.ApplicationUserRepository;
+import org.json.simple.JSONObject;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -21,8 +24,15 @@ public class UserController {
 	}
 
 	@PostMapping("/sign-up")
-	public void signUp(@RequestBody ApplicationUser user) {
+	public ResponseEntity signUp(@RequestBody ApplicationUser user) {
+
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		applicationUserRepository.save(user);
+
+        JSONObject response = new JSONObject();
+        response.put("status", "success");
+        response.put("message", "sign up success");
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
 	}
 }
